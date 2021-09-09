@@ -10,6 +10,7 @@ int main()              // Program's entry point
 {
     /* Major program codes */
     cout << "Hello World!" << endl;
+    cerr << "error" << endl;
 
     return 0;           // A nice ending
 }
