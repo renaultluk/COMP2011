@@ -22,6 +22,14 @@ const int MAX_ROTATIONS = 1024;
 // Declare additional helper functions below when necessary
 // int myHelperFunction(int argc, char *argv[])
 
+int updateRotations(int arr[], int arrLen, int k, int rotations[], int &rotationLen) {
+    rotate(arr, arrLen, k);
+    rotations[rotationLen] = k;
+    rotationLen++;
+
+    return 0;
+}
+
 // End of Helper Functions
 
 // Tasks
@@ -33,15 +41,15 @@ int rotate(int arr[], int arrLen, int k)
 {
     // Task 1 TODO
     int tmpArr[MAX_ARR_LEN];
-    if ((k < 0) || (k > arrLen)) {
+    if ((k < 0) || (k > arrLen-1)) {
         cerr << "Error: Index k is out of range." << endl;
         return -1;
     } else {
-        for (int i = 0; i < k; i++) {
+        for (int i = 0; i <= k; i++) {
             tmpArr[i] = arr[i];
         }
 
-        for (int i = 0; i < k; i++) {
+        for (int i = 0; i <= k; i++) {
             arr[i] = tmpArr[k - i];
         }
     }
@@ -56,8 +64,9 @@ int swapAndRecord(int arr[], int arrLen, int indexA, int indexB, int rotations[]
 {
     // Task 2 TODO
     int L, R;
+    rotationLen = 0;
     
-    if ((indexA < 0) || (indexA > arrLen) || (indexB < 0) || (indexB > arrLen)) {
+    if ((indexA < 0) || (indexA > arrLen-1) || (indexB < 0) || (indexB > arrLen-1)) {
         cerr << "Error: Index out of range." << endl;
         return -1;
     } else {
@@ -69,11 +78,18 @@ int swapAndRecord(int arr[], int arrLen, int indexA, int indexB, int rotations[]
             R = indexB;
         }
         
-        rotate(arr, arrLen, L-1);
-        rotate(arr, arrLen, L);
-        rotate(arr, arrLen, R);
-        rotate(arr, arrLen, R-L-1);
-        rotate(arr, arrLen, R-L-2);
+        if (L != 0) {   //handles the red part in the diagram (if present)
+            updateRotations(arr, arrLen, L-1, rotations, rotationLen);
+            updateRotations(arr, arrLen, R-1, rotations, rotationLen);
+        }
+        
+        updateRotations(arr, arrLen, R, rotations, rotationLen);
+
+        if (R-L > 1) {  //handles the green part in the diagram (if present)
+            updateRotations(arr, arrLen, R-L-1, rotations, rotationLen);
+            updateRotations(arr, arrLen, R-L-2, rotations, rotationLen);
+        }
+
         rotate(arr, arrLen, R-1);
     }
 
@@ -85,8 +101,12 @@ int swapAndRecord(int arr[], int arrLen, int indexA, int indexB, int rotations[]
 void sortAndRecord(int arr[], int arrLen, int rotations[], int &rotationLen)
 {
     // Task 3 TODO
-    for (int i = 0; i < arrLen; i++) {
-        
+    for (int i = 0; i < arrLen-1; i++) {    //bubble sort
+        for (int j = 0; j < arrLen-i-1; j++) {
+            if (arr[j] > arr[j+1]) {
+                swapAndRecord(arr, arrLen, j, j+1, rotations, rotationLen);
+            }
+        }
     }
     // End of Task 3 TODO
 }
