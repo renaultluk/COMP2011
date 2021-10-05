@@ -1,9 +1,9 @@
 /*
  * COMP2011 (Fall 2021) Programming Assignment 1
  *
- * Student name: FILL YOUR NAME HERE
- * Student ID: FILL YOUR STUDENT ID NUMBER HERE
- * Student email: FILL YOUR EMAIL HERE
+ * Student name: Luk Wang Lok
+ * Student ID: 20679065
+ * Student email: wlluk@connect.ust.hk
  *
  */
 
@@ -22,12 +22,46 @@ const int MAX_ROTATIONS = 1024;
 // Declare additional helper functions below when necessary
 // int myHelperFunction(int argc, char *argv[])
 
-int updateRotations(int arr[], int arrLen, int k, int rotations[], int &rotationLen) {
+void updateRotations(int arr[], int arrLen, int k, int rotations[], int &rotationLen) {
     rotate(arr, arrLen, k);
     rotations[rotationLen] = k;
     rotationLen++;
+}
 
-    return 0;
+void selectionSort(int arr[], int sorted[], int arrLen) {
+    bool selected[MAX_ARR_LEN];
+
+    for (int i = 0; i < MAX_ARR_LEN; i++) {
+        selected[i] = false;
+    }
+
+    for (int i = 0; i < arrLen; i++) {
+        int min = arr[0];
+        int minIndex = 0;
+        for (int j = 0; j < arrLen; j++) {
+            if ((arr[j] < min) && (!selected[j])) {
+                min = arr[j];
+                minIndex = j;
+            }
+        }
+        sorted[i] = min;
+        selected[minIndex] = true;
+    }
+}
+
+bool arrayEqual(int src[], int tgt[], int arrLen) {
+    int sortedSrc[MAX_ARR_LEN];
+    int sortedTgt[MAX_ARR_LEN];
+
+    selectionSort(src, sortedSrc, arrLen);
+    selectionSort(tgt, sortedTgt, arrLen);
+
+    for (int i = 0; i < arrLen; i++) {
+        if (sortedSrc[i] != sortedTgt[i]) {
+            return false;
+        }
+    }
+    return true;
 }
 
 // End of Helper Functions
@@ -90,7 +124,7 @@ int swapAndRecord(int arr[], int arrLen, int indexA, int indexB, int rotations[]
             updateRotations(arr, arrLen, R-L-2, rotations, rotationLen);
         }
 
-        rotate(arr, arrLen, R-1);
+        updateRotations(arr, arrLen, R-1, rotations, rotationLen);
     }
 
     return 0;
@@ -115,7 +149,24 @@ void sortAndRecord(int arr[], int arrLen, int rotations[], int &rotationLen)
 int transformAndRecord(int src[], int tgt[], int arrLen, int rotations[], int &rotationLen)
 {
     // Task 4 TODO
+    int tmpArr[MAX_ARR_LEN];
+    int tmpRotationLen = 0;
+    if (!arrayEqual(src, tgt, arrLen)) {
+        return -1;
+    } else {
+        sortAndRecord(tgt, arrLen, tmpArr, tmpRotationLen);
+        rotate(tmpArr, tmpRotationLen, tmpRotationLen-1);
 
+        sortAndRecord(src, arrLen, rotations, rotationLen);
+
+        for (int i = 0; i < tmpRotationLen; i++) {
+            rotations[rotationLen + i] = tmpArr[i];
+        }
+
+        rotationLen += tmpRotationLen;
+    }
+
+    return 0;
     // End of Task 4 TODO
 }
 
