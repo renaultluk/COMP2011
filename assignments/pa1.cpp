@@ -23,7 +23,6 @@ const int MAX_ROTATIONS = 1024;
 // int myHelperFunction(int argc, char *argv[])
 
 void updateRotations(int arr[], int arrLen, int k, int rotations[], int &rotationLen) {
-    rotate(arr, arrLen, k);
     rotations[rotationLen] = k;
     rotationLen++;
 }
@@ -38,6 +37,13 @@ void selectionSort(int arr[], int sorted[], int arrLen) {
     for (int i = 0; i < arrLen; i++) {
         int min = arr[0];
         int minIndex = 0;
+        for (int j = 0; j < arrLen; j++) {
+            if (!selected[j]) {
+                min = arr[j];
+                minIndex = j;
+                break;
+            }
+        }
         for (int j = 0; j < arrLen; j++) {
             if ((arr[j] < min) && (!selected[j])) {
                 min = arr[j];
@@ -76,7 +82,7 @@ int rotate(int arr[], int arrLen, int k)
     // Task 1 TODO
     int tmpArr[MAX_ARR_LEN];
     if ((k < 0) || (k > arrLen-1)) {
-        cerr << "Error: Index k is out of range." << endl;
+        cout << "Error: Index k is out of range." << endl;
         return -1;
     } else {
         for (int i = 0; i <= k; i++) {
@@ -98,10 +104,9 @@ int swapAndRecord(int arr[], int arrLen, int indexA, int indexB, int rotations[]
 {
     // Task 2 TODO
     int L, R;
-    rotationLen = 0;
     
     if ((indexA < 0) || (indexA > arrLen-1) || (indexB < 0) || (indexB > arrLen-1)) {
-        cerr << "Error: Index out of range." << endl;
+        cout << "Error: Index out of range." << endl;
         return -1;
     } else {
         if (indexB < indexA) {
@@ -113,18 +118,25 @@ int swapAndRecord(int arr[], int arrLen, int indexA, int indexB, int rotations[]
         }
         
         if (L != 0) {   //handles the red part in the diagram (if present)
+            rotate(arr, arrLen, L-1);
             updateRotations(arr, arrLen, L-1, rotations, rotationLen);
+            rotate(arr, arrLen, R-1);
             updateRotations(arr, arrLen, R-1, rotations, rotationLen);
         }
         
+        rotate(arr, arrLen,R);
         updateRotations(arr, arrLen, R, rotations, rotationLen);
 
         if (R-L > 1) {  //handles the green part in the diagram (if present)
+            rotate(arr, arrLen, R-L-1);
             updateRotations(arr, arrLen, R-L-1, rotations, rotationLen);
+            rotate(arr, arrLen, R-L-2);
             updateRotations(arr, arrLen, R-L-2, rotations, rotationLen);
         }
 
+        rotate(arr, arrLen, R-1);
         updateRotations(arr, arrLen, R-1, rotations, rotationLen);
+        
     }
 
     return 0;
@@ -149,21 +161,29 @@ void sortAndRecord(int arr[], int arrLen, int rotations[], int &rotationLen)
 int transformAndRecord(int src[], int tgt[], int arrLen, int rotations[], int &rotationLen)
 {
     // Task 4 TODO
-    int tmpArr[MAX_ARR_LEN];
+    int tmpRotations[MAX_ROTATIONS];
+    int tmpSrcArr[MAX_ARR_LEN];
     int tmpRotationLen = 0;
     if (!arrayEqual(src, tgt, arrLen)) {
         return -1;
     } else {
-        sortAndRecord(tgt, arrLen, tmpArr, tmpRotationLen);
-        rotate(tmpArr, tmpRotationLen, tmpRotationLen-1);
+        sortAndRecord(tgt, arrLen, tmpRotations, tmpRotationLen);
+        rotate(tmpRotations, tmpRotationLen, tmpRotationLen-1);
 
-        sortAndRecord(src, arrLen, rotations, rotationLen);
+        for (int i = 0; i < arrLen; i++){
+            tmpSrcArr[i] = src[i];
+        }
+        sortAndRecord(tmpSrcArr, arrLen, rotations, rotationLen);
 
         for (int i = 0; i < tmpRotationLen; i++) {
-            rotations[rotationLen + i] = tmpArr[i];
+            rotations[rotationLen + i] = tmpRotations[i];
         }
 
         rotationLen += tmpRotationLen;
+
+        for (int i = 0; i < rotationLen; i++) {
+            rotate(src, arrLen, rotations[i]);
+        }
     }
 
     return 0;
@@ -278,6 +298,7 @@ void runSwap(int arr[], int arrLen)
     cin >> indexA;
     cout << "? Enter the 2nd index:";
     cin >> indexB;
+    rotationLen = 0;
     output = swapAndRecord(arr, arrLen, indexA, indexB, rotations, rotationLen);
     if (output < 0)
     {
