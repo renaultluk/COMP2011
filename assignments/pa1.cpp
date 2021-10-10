@@ -55,7 +55,7 @@ void selectionSort(int arr[], int sorted[], int arrLen) {
     }
 }
 
-bool arrayEqual(int src[], int tgt[], int arrLen) {
+bool arrayEqual(int src[], int tgt[], int arrLen) {   
     int sortedSrc[MAX_ARR_LEN];
     int sortedTgt[MAX_ARR_LEN];
 
@@ -80,7 +80,7 @@ bool arrayEqual(int src[], int tgt[], int arrLen) {
 int rotate(int arr[], int arrLen, int k)
 {
     // Task 1 TODO
-    int tmpArr[MAX_ARR_LEN];
+    int tmpArr[MAX_ROTATIONS];
     if ((k < 0) || (k > arrLen-1)) {
         cout << "Error: Index k is out of range." << endl;
         return -1;
@@ -120,8 +120,8 @@ int swapAndRecord(int arr[], int arrLen, int indexA, int indexB, int rotations[]
         if (L != 0) {   //handles the red part in the diagram (if present)
             rotate(arr, arrLen, L-1);
             updateRotations(arr, arrLen, L-1, rotations, rotationLen);
-            rotate(arr, arrLen, R-1);
-            updateRotations(arr, arrLen, R-1, rotations, rotationLen);
+            rotate(arr, arrLen, L);
+            updateRotations(arr, arrLen, L, rotations, rotationLen);
         }
         
         rotate(arr, arrLen,R);
