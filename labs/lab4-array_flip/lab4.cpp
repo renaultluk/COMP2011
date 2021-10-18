@@ -22,6 +22,7 @@ void initialize_2D_array(char s[][NUM_COL_MAX+1]){
 void h_flip(const char s[][NUM_COL_MAX+1], int num_row, int num_col, char h_flipped[][NUM_COL_MAX+1], int size[2]){ /* horizontal flip */
     // Task 1: horizontal flip of the 2D array, concatenate with the original 2D array
     // Please fill in your code here
+    initialize_2D_array(h_flipped);
     for (int i = 0; i < num_row; i++) {
         for (int j = 0; j < num_col; j++) {
             h_flipped[i][j] = s[i][j];
@@ -35,6 +36,7 @@ void h_flip(const char s[][NUM_COL_MAX+1], int num_row, int num_col, char h_flip
 void v_flip(const char s[][NUM_COL_MAX+1], int num_row, int num_col, char v_flipped[][NUM_COL_MAX+1], int size[2]){ /* vertical flip */
     // Task 2: vertial flip of the 2D array, concatenate with the original 2D array
     // Please fill in your code here
+    initialize_2D_array(v_flipped);
     for (int i = 0; i < num_row; i++) {
         for (int j = 0; j < num_col; j++) {
             v_flipped[i][j] = s[i][j];
@@ -49,6 +51,8 @@ void hv_flip(const char s[][NUM_COL_MAX+1], int num_row, int num_col, char hv_fl
     // Task 3: horizontal and vertical flips of the 2D array, concatenate with the original 2D array
     // Please fill in your code here
     char tmpArr[NUM_ROW_MAX][NUM_COL_MAX+1];
+    initialize_2D_array(hv_flipped);
+    initialize_2D_array(tmpArr);
     h_flip(s, num_row, num_col, tmpArr, size);
     v_flip(tmpArr, num_row, size[1], hv_flipped, size);
 }
