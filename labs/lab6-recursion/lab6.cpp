@@ -96,7 +96,7 @@ int main()
     char farm[10][10]; // farm state 
 
     // Change this paramenter from 1 to 5 to test different cases.  //
-    unsigned int test_case = 2;
+    unsigned int test_case = 5;
 
     // set M, N and for each test_case
     switch(test_case) {
