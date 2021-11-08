@@ -30,12 +30,16 @@ bool isAvailable(const char map[MAP_HEIGHT][MAP_WIDTH], int x, int y) {
    return outOfBounds(x, y) ? false : map[y][x] == AVAILABLE;
 }
 
+bool isRobot(const char map[MAP_HEIGHT][MAP_WIDTH], int x, int y) {
+   return outOfBounds(x, y) ? false : map[y][x] == ROBOT;
+}
+
 bool hasVisited(const char map[MAP_HEIGHT][MAP_WIDTH], int x, int y) {
    return outOfBounds(x, y) ? false : map[y][x] == VISITED;
 }
 
 bool canVisit(const char map[MAP_HEIGHT][MAP_WIDTH], int x, int y) {
-   return outOfBounds(x, y) ? false : map[y][x] == AVAILABLE || map[y][x] == CHARGER || map[y][x] == ROBOT;
+   return outOfBounds(x, y) ? false : isAvailable(map, x, y) || isCharger(map, x, y) || isRobot(map, x, y);
 }
 
 bool isTarget(int robot_x, int robot_y, int target_x, int target_y) {
@@ -57,7 +61,7 @@ int checkCell(char map[MAP_HEIGHT][MAP_WIDTH], int x, int y, int full_energy, in
 int findMaximumPlace(int robot_x, int robot_y, int robot_energy, int robot_full_energy, 
                      char result_map[MAP_HEIGHT][MAP_WIDTH], char temp_map[MAP_HEIGHT][MAP_WIDTH]) {
    
-   if (robot_x < MAP_WIDTH && robot_x >= 0 && robot_y < MAP_HEIGHT && robot_y >= 0) {
+   if (!outOfBounds(robot_x, robot_y)) {
 
 		if (temp_map[1][1] == 0) {
 			result_map[robot_y][robot_x] = AVAILABLE;
@@ -89,236 +93,146 @@ int findMaximumPlace(int robot_x, int robot_y, int robot_energy, int robot_full_
 
 // ** ------- Task 2 ------- ** //
 
-void bfs(char map[MAP_HEIGHT][MAP_WIDTH], int queue[PA2_MAX_PATH][2], int &queueCount, int &walkedCount, int robot_x, int robot_y, 
-                        int target_x, int target_y, int energy, int full_energy) {
-   // cout << "bfs for (" << robot_x << "," << robot_y << ")" << endl;
-   // if (energy > 0) {
-      if (canVisit(map, robot_x, robot_y)) {
-         // if (isCharger(map, robot_x, robot_y)) {
-         //    energy = full_energy;
-         // }
-         map[robot_y][robot_x] = VISITED;
-         walkedCount++;
-         if (isTarget(robot_x, robot_y, target_x, target_y)) {
-            return;
-         } else {
-
-            if (canVisit(map, robot_x-1, robot_y)) {
-               queue[queueCount][0] = robot_x-1;
-               queue[queueCount][1] = robot_y;
-               queueCount++;
-               // cout << "(" << robot_x-1 << "," << robot_y << ") enqueued" << endl;
-            }
-            if (canVisit(map, robot_x, robot_y+1)) {
-               queue[queueCount][0] = robot_x;
-               queue[queueCount][1] = robot_y+1;
-               queueCount++;
-               // cout << "(" << robot_x << "," << robot_y+1 << ") enqueued" << endl;
-            }
-            if (canVisit(map, robot_x+1, robot_y)) {
-               queue[queueCount][0] = robot_x+1;
-               queue[queueCount][1] = robot_y;
-               queueCount++;
-               // cout << "(" << robot_x+1 << "," << robot_y << ") enqueued" << endl;
-            }
-            if (canVisit(map, robot_x, robot_y-1)) {
-               queue[queueCount][0] = robot_x;
-               queue[queueCount][1] = robot_y-1;
-               queueCount++;
-               // cout << "(" << robot_x << "," << robot_y-1 << ") enqueued" << endl;
-            }
-
-            // if (isCharger(map, robot_x-1, robot_y)) {
-            //    queue[queueCount][0] = robot_x-1;
-            //    queue[queueCount][1] = robot_y;
-            //    queueCount++;
-            //    // cout << "(" << robot_x-1 << "," << robot_y << ") enqueued" << endl;
-            // }
-            // if (isCharger(map, robot_x, robot_y+1)) {
-            //    queue[queueCount][0] = robot_x;
-            //    queue[queueCount][1] = robot_y+1;
-            //    queueCount++;
-            //    // cout << "(" << robot_x << "," << robot_y+1 << ") enqueued" << endl;
-            // }
-            // if (isCharger(map, robot_x+1, robot_y)) {
-            //    queue[queueCount][0] = robot_x+1;
-            //    queue[queueCount][1] = robot_y;
-            //    queueCount++;
-            //    // cout << "(" << robot_x+1 << "," << robot_y << ") enqueued" << endl;
-            // }
-            // if (isCharger(map, robot_x, robot_y-1)) {
-            //    queue[queueCount][0] = robot_x;
-            //    queue[queueCount][1] = robot_y-1;
-            //    queueCount++;
-            //    // cout << "(" << robot_x << "," << robot_y-1 << ") enqueued" << endl;
-            // }
-
-            // if (canVisit(map, robot_x, robot_y-1)) {
-            //    queue[queueCount][0] = robot_x;
-            //    queue[queueCount][1] = robot_y-1;
-            //    queueCount++;
-            //    cout << "(" << robot_x << "," << robot_y-1 << ") enqueued" << endl;
-            // }
-            // if (canVisit(map, robot_x+1, robot_y)) {
-            //    queue[queueCount][0] = robot_x+1;
-            //    queue[queueCount][1] = robot_y;
-            //    queueCount++;
-            //    cout << "(" << robot_x+1 << "," << robot_y << ") enqueued" << endl;
-            // }
-            // if (canVisit(map, robot_x, robot_y+1)) {
-            //    queue[queueCount][0] = robot_x;
-            //    queue[queueCount][1] = robot_y+1;
-            //    queueCount++;
-            //    cout << "(" << robot_x << "," << robot_y+1 << ") enqueued" << endl;
-            // }
-            // if (canVisit(map, robot_x-1, robot_y)) {
-            //    queue[queueCount][0] = robot_x-1;
-            //    queue[queueCount][1] = robot_y;
-            //    queueCount++;
-            //    cout << "(" << robot_x-1 << "," << robot_y << ") enqueued" << endl;
-            // }
-            bfs(map, queue, queueCount, walkedCount, queue[walkedCount][0], queue[walkedCount][1], target_x, target_y, energy, full_energy);
-         }
-      } else if (hasVisited(map, robot_x, robot_y)) {
-         walkedCount++;
-         bfs(map, queue, queueCount, walkedCount, queue[walkedCount][0], queue[walkedCount][1], target_x, target_y, energy, full_energy);
-      }
-   // }
-}
-
-void linkPath(char map[MAP_HEIGHT][MAP_WIDTH], int queue[PA2_MAX_PATH][2], char result_sequence[], int i, int past_x, int past_y, 
-                  int energy, int full_energy, int robot_x, int robot_y, int &pathCount) {
-   if (isCharger(map, past_x, past_y)) {
-      energy = full_energy;
-   }
-   if (energy < 0) {
-      pathCount = PA2_MAX_PATH;
-      return;
-   } else if (i < 0) {
-
-      if (robot_x == past_x && robot_y == past_y+1) {
-         result_sequence[pathCount] = 'U';
-      } 
-      else if (robot_x == past_x-1 && robot_y == past_y) {
-         result_sequence[pathCount] = 'R';
-      }
-      else if (robot_x == past_x && robot_y == past_y-1) {
-         result_sequence[pathCount] = 'D';
-      }
-      else if (robot_x == past_x+1 && robot_y == past_y) {
-         result_sequence[pathCount] = 'L';
-      }
-
-      pathCount++;
+void initHeatMap(int heat_map[MAP_HEIGHT][MAP_WIDTH], int i) {
+   if (i >= PA2_MAX_PATH) {
       return;
    } else {
+      heat_map[i/MAP_WIDTH][i%MAP_WIDTH] = 0;
+      initHeatMap(heat_map, i+1);
+   }
+}
 
-      // if (queue[i][0] == past_x+1 && queue[i][1] == past_y) {
-      //    result_sequence[pathCount] = 'L';
-      //    pathCount++;
-      //    // cout << "energy level: " << energy << endl;
-      //    linkPath(map, queue, result_sequence, i-1, queue[i][0], queue[i][1], energy-1, full_energy, robot_x, robot_y, pathCount);
-      // } 
-      // else if (queue[i][0] == past_x && queue[i][1] == past_y-1) {
-      //    result_sequence[pathCount] = 'D';
-      //    pathCount++;
-      //    // cout << "energy level: " << energy << endl;
-      //    linkPath(map, queue, result_sequence, i-1, queue[i][0], queue[i][1], energy-1, full_energy, robot_x, robot_y, pathCount);
-      // }
-      // else if (queue[i][0] == past_x-1 && queue[i][1] == past_y) {
-      //    result_sequence[pathCount] = 'R';
-      //    pathCount++;
-      //    // cout << "energy level: " << energy << endl;
-      //    linkPath(map, queue, result_sequence, i-1, queue[i][0], queue[i][1], energy-1, full_energy, robot_x, robot_y, pathCount);
-      // }
-      // else if (queue[i][0] == past_x && queue[i][1] == past_y+1) {
-      //    result_sequence[pathCount] = 'U';
-      //    pathCount++;
-      //    // cout << "energy level: " << energy << endl;
-      //    linkPath(map, queue, result_sequence, i-1, queue[i][0], queue[i][1], energy-1, full_energy, robot_x, robot_y, pathCount);
-      // }
-      
-      if (queue[i][0] == past_x && queue[i][1] == past_y+1 && isCharger(map, queue[i][0], queue[i][1])) {
-         cout << "(" << queue[i][0] << "," << queue[i][1] << ") goes up to (" << past_x << "," << past_y << ")" << endl;
-         result_sequence[pathCount] = 'U';
-         pathCount++;
-         cout << "energy level: " << energy << endl;
-         linkPath(map, queue, result_sequence, i-1, queue[i][0], queue[i][1], energy-1, full_energy, robot_x, robot_y, pathCount);
-      } 
-      else if (queue[i][0] == past_x-1 && queue[i][1] == past_y && isCharger(map, queue[i][0], queue[i][1])) {
-         cout << "(" << queue[i][0] << "," << queue[i][1] << ") goes right to (" << past_x << "," << past_y << ")" << endl;
-         result_sequence[pathCount] = 'R';
-         pathCount++;
-         cout << "energy level: " << energy << endl;
-         linkPath(map, queue, result_sequence, i-1, queue[i][0], queue[i][1], energy-1, full_energy, robot_x, robot_y, pathCount);
+void shift(int queue[PA2_MAX_PATH][3], int size, int i) {
+   if (i >= size-1) {
+      return;
+   } else {
+      queue[i][0] = queue[i+1][0];
+      queue[i][1] = queue[i+1][1];
+      queue[i][2] = queue[i+1][2];
+      shift(queue, size, i+1);
+   }
+}
+
+void pop(int queue[PA2_MAX_PATH][3], int &size) {
+   if (size < 1) {
+      return;
+   } else {
+      shift(queue, size, 0);
+      size--;
+   }
+}
+
+void floodFill(char map[MAP_HEIGHT][MAP_WIDTH], int heat_map[MAP_HEIGHT][MAP_WIDTH], int queue[PA2_MAX_PATH][3], int queue_size, int x, int y, int target_x, int target_y, int energy, int full_energy, int i) {
+   // cout <<"entered floodFill for (" << x << ", " << y << "), i = " << i << endl;
+
+   if (queue_size > 0) {
+      pop(queue, queue_size);
+      if (!outOfBounds(x, y)) {
+         if (isTarget(x, y, target_x, target_y)) {
+            map[y][x] = VISITED;
+            heat_map[y][x] = i;
+            // cout << "arrived at (" << x << ", " << y << "), i = " << i << endl;
+            // cout << "branching off to: " << endl;
+            // cout << "U: (" << x << ", " << y-1 << ")" << endl;
+            // cout << "R: (" << x+1 << ", " << y << ")" << endl;
+            // cout << "D: (" << x << ", " << y+1 << ")" << endl;
+            // cout << "L: (" << x-1 << ", " << y << ")" << endl;
+            return;
+         }
+
+         if (isCharger(map, x, y)) {
+            energy = full_energy;
+            cout << "charged at (" << x << ", " << y << ")" << endl;
+            map[y][x] = VISITED;
+            heat_map[y][x] = i;
+            // cout << "branching off to: " << endl;
+            // cout << "U: (" << x << ", " << y-1 << ")" << endl;
+            // cout << "R: (" << x+1 << ", " << y << ")" << endl;
+            // cout << "D: (" << x << ", " << y+1 << ")" << endl;
+            // cout << "L: (" << x-1 << ", " << y << ")" << endl;
+         }
+
+         if (isAvailable(map, x, y) || isRobot(map, x, y)) {
+            map[y][x] = VISITED;
+            heat_map[y][x] = i;
+            // cout << "branching off to: " << endl;
+            // cout << "U: (" << x << ", " << y-1 << ")" << endl;
+            // cout << "R: (" << x+1 << ", " << y << ")" << endl;
+            // cout << "D: (" << x << ", " << y+1 << ")" << endl;
+            // cout << "L: (" << x-1 << ", " << y << ")" << endl;
+         }
+
+         if (energy >= 0 && !isBlocked(map, x, y)) {
+            if (canVisit(map, x, y-1)) {
+               queue[queue_size][0] = x;
+               queue[queue_size][1] = y-1;
+               queue[queue_size][2] = i+1;
+               queue_size++;
+            }
+            if (canVisit(map, x+1, y)) {
+               queue[queue_size][0] = x+1;
+               queue[queue_size][1] = y;
+               queue[queue_size][2] = i+1;
+               queue_size++;
+            }
+            if (canVisit(map, x, y+1)) {
+               queue[queue_size][0] = x;
+               queue[queue_size][1] = y+1;
+               queue[queue_size][2] = i+1;
+               queue_size++;
+            }
+            if (canVisit(map, x-1, y)) {
+               queue[queue_size][0] = x-1;
+               queue[queue_size][1] = y;
+               queue[queue_size][2] = i+1;
+               queue_size++;
+            }
+
+            if (queue[0][2] != i) {
+               energy--;
+            }
+
+            floodFill(map, heat_map, queue, queue_size, queue[0][0], queue[0][1], target_x, target_y, energy, full_energy, queue[0][2]);
+
+            // floodFill(map, heat_map, queue, queue_size, x, y-1, target_x, target_y, energy-1, full_energy, i);
+            // floodFill(map, heat_map, queue, queue_size, x+1, y, target_x, target_y, energy-1, full_energy, i);
+            // floodFill(map, heat_map, queue, queue_size, x, y+1, target_x, target_y, energy-1, full_energy, i);
+            // floodFill(map, heat_map, queue, queue_size, x-1, y, target_x, target_y, energy-1, full_energy, i);
+         }
       }
-      else if (queue[i][0] == past_x && queue[i][1] == past_y-1 && isCharger(map, queue[i][0], queue[i][1])) {
-         cout << "(" << queue[i][0] << "," << queue[i][1] << ") goes down to (" << past_x << "," << past_y << ")" << endl;
-         result_sequence[pathCount] = 'D';
-         pathCount++;
-         cout << "energy level: " << energy << endl;
-         linkPath(map, queue, result_sequence, i-1, queue[i][0], queue[i][1], energy-1, full_energy, robot_x, robot_y, pathCount);
+   }
+};
+
+void printHeatMap(int heat_map[MAP_HEIGHT][MAP_WIDTH]) {
+   for (int i = 0; i < MAP_HEIGHT; i++) {
+      for (int j = 0; j < MAP_WIDTH; j++) {
+         cout.width(3);
+         cout << heat_map[i][j];
       }
-      else if (queue[i][0] == past_x+1 && queue[i][1] == past_y && isCharger(map, queue[i][0], queue[i][1])) {
-         cout << "(" << queue[i][0] << "," << queue[i][1] << ") goes left to (" << past_x << "," << past_y << ")" << endl;
-         result_sequence[pathCount] = 'L';
-         pathCount++;
-         cout << "energy level: " << energy << endl;
-         linkPath(map, queue, result_sequence, i-1, queue[i][0], queue[i][1], energy-1, full_energy, robot_x, robot_y, pathCount);
-      }
-      
-      else if (queue[i][0] == past_x && queue[i][1] == past_y+1) {
-         cout << "(" << queue[i][0] << "," << queue[i][1] << ") goes up to (" << past_x << "," << past_y << ")" << endl;
-         result_sequence[pathCount] = 'U';
-         pathCount++;
-         cout << "energy level: " << energy << endl;
-         linkPath(map, queue, result_sequence, i-1, queue[i][0], queue[i][1], energy-1, full_energy, robot_x, robot_y, pathCount);
-      } 
-      else if (queue[i][0] == past_x-1 && queue[i][1] == past_y) {
-         cout << "(" << queue[i][0] << "," << queue[i][1] << ") goes right to (" << past_x << "," << past_y << ")" << endl;
-         result_sequence[pathCount] = 'R';
-         pathCount++;
-         cout << "energy level: " << energy << endl;
-         linkPath(map, queue, result_sequence, i-1, queue[i][0], queue[i][1], energy-1, full_energy, robot_x, robot_y, pathCount);
-      }
-      else if (queue[i][0] == past_x && queue[i][1] == past_y-1) {
-         cout << "(" << queue[i][0] << "," << queue[i][1] << ") goes down to (" << past_x << "," << past_y << ")" << endl;
-         result_sequence[pathCount] = 'D';
-         pathCount++;
-         cout << "energy level: " << energy << endl;
-         linkPath(map, queue, result_sequence, i-1, queue[i][0], queue[i][1], energy-1, full_energy, robot_x, robot_y, pathCount);
-      }
-      else if (queue[i][0] == past_x+1 && queue[i][1] == past_y) {
-         cout << "(" << queue[i][0] << "," << queue[i][1] << ") goes left to (" << past_x << "," << past_y << ")" << endl;
-         result_sequence[pathCount] = 'L';
-         pathCount++;
-         cout << "energy level: " << energy << endl;
-         linkPath(map, queue, result_sequence, i-1, queue[i][0], queue[i][1], energy-1, full_energy, robot_x, robot_y, pathCount);
-      }
-      else {
-         linkPath(map, queue, result_sequence, i-1, past_x, past_y, energy, full_energy, robot_x, robot_y, pathCount);
-      }
+      cout << endl;
    }
 }
 
 int findShortestDistance(int robot_x, int robot_y, int target_x, int target_y, int robot_energy, 
                          int robot_full_energy, const char map[MAP_HEIGHT][MAP_WIDTH], char temp_map[MAP_HEIGHT][MAP_WIDTH]) {
-   int queue[PA2_MAX_PATH][2];
-   char result_sequence[PA2_MAX_PATH];
-   int queueCount = 0;
-   int pathCount = 1;
-   int walkedCount = 0;
+   int heat_map[MAP_HEIGHT][MAP_WIDTH];
+   int queue[PA2_MAX_PATH][3];
+   int queue_size = 1;
 
+   initHeatMap(heat_map, 0);
+   queue[0][0] = robot_x;
+   queue[0][1] = robot_y;
+   queue[0][2] = 1;
    copyMap(temp_map, map);
-   if (canVisit(temp_map, target_x, target_y)) {
-      bfs(temp_map, queue, queueCount, walkedCount, robot_x, robot_y, target_x, target_y, robot_energy, robot_full_energy);
-      if (robot_x != target_x || robot_y != target_y) {
-         linkPath(temp_map, queue, result_sequence, walkedCount, target_x, target_y, robot_energy, robot_full_energy, robot_x, robot_y, pathCount);
-      }
+   floodFill(temp_map, heat_map, queue, queue_size, robot_x, robot_y, target_x, target_y, robot_energy, robot_full_energy, 1);
+   printMap(temp_map);
+   printHeatMap(heat_map);
+   cout << "heat map index at target: " << heat_map[target_y][target_x] << endl;
+   if (heat_map[target_y][target_x] == 0) {
+      return PA2_MAX_PATH;
    } else {
-      pathCount = PA2_MAX_PATH;
+      return heat_map[target_y][target_x];
    }
-   return pathCount;
 }
 
 // ** ------- Task 3 ------- ** //
@@ -333,27 +247,60 @@ void reverse_arr(char original[], char target[], int size, int i){
    }
 }
 
+void linkPath(int heat_map[MAP_HEIGHT][MAP_WIDTH], char path[PA2_MAX_PATH], int x, int y, int pathCount){
+   if(heat_map[y][x] == 1 || pathCount < 0){
+      
+      return;
+   }
+   else{
+      if(heat_map[y][x+1] == heat_map[y][x]-1){
+         path[pathCount] = 'L';
+         pathCount--;
+         linkPath(heat_map, path, x+1, y, pathCount);
+      }
+      else if(heat_map[y-1][x] == heat_map[y][x]-1){
+         path[pathCount] = 'D';
+         pathCount--;
+         linkPath(heat_map, path, x, y-1, pathCount);
+      }
+      else if(heat_map[y][x-1] == heat_map[y][x]-1){
+         path[pathCount] = 'R';
+         pathCount--;
+         linkPath(heat_map, path, x-1, y, pathCount);
+      }
+      else if(heat_map[y+1][x] == heat_map[y][x]-1){
+         path[pathCount] = 'U';
+         pathCount--;
+         linkPath(heat_map, path, x, y+1, pathCount);
+      }
+   }
+}
+
 int findPathSequence(int robot_x, int robot_y, int target_x, int target_y, int robot_energy, 
                      int robot_full_energy, char result_sequence[], const char map[MAP_HEIGHT][MAP_WIDTH], char temp_map[MAP_HEIGHT][MAP_WIDTH]) {
-   int queue[PA2_MAX_PATH][2];
-   int queueCount = 0;
+   int heat_map[MAP_HEIGHT][MAP_WIDTH];
+   int queue[PA2_MAX_PATH][3];
+   int queue_size = 1;
    int pathCount = 0;
-   int walkedCount = 0;
-   char tmp_sequence[PA2_MAX_PATH];
 
+   char path[PA2_MAX_PATH];
+
+   initHeatMap(heat_map, 0);
+   queue[0][0] = robot_x;
+   queue[0][1] = robot_y;
+   queue[0][2] = 1;
    copyMap(temp_map, map);
-   if (canVisit(temp_map, target_x, target_y)) {
-      bfs(temp_map, queue, queueCount, walkedCount, robot_x, robot_y, target_x, target_y, robot_energy, robot_full_energy);
-      if (robot_x != target_x || robot_y != target_y) {
-         linkPath(temp_map, queue, tmp_sequence, walkedCount, target_x, target_y, robot_energy, robot_full_energy, robot_x, robot_y, pathCount);
-      }
-      printMap(temp_map);
-      reverse_arr(tmp_sequence, result_sequence, pathCount, 0);
-      result_sequence[pathCount] = 'T';
-      result_sequence[pathCount+1] = '\0';
-      return pathCount+1;
-   } else {
+   floodFill(temp_map, heat_map, queue, queue_size, robot_x, robot_y, target_x, target_y, robot_energy, robot_full_energy, 1);
+   printMap(temp_map);
+   printHeatMap(heat_map);
+   if (heat_map[target_y][target_x] == 0) {
       return PA2_MAX_PATH;
+   } else {
+      pathCount = heat_map[target_y][target_x];
+      result_sequence[pathCount] = '\0';
+      result_sequence[pathCount-1] = 'T';
+      linkPath(heat_map,   result_sequence, target_x, target_y, pathCount-2);
+      return heat_map[target_y][target_x];
    }
 };
 
