@@ -46,6 +46,7 @@ bool isTarget(int robot_x, int robot_y, int target_x, int target_y) {
    return (robot_x == target_x) && (robot_y == target_y);
 }
 
+//* safe *//
 int checkCell(char map[MAP_HEIGHT][MAP_WIDTH], int x, int y, int full_energy, int &energy) {
    if (isCharger(map, x, y)) {
       energy = full_energy;
@@ -57,9 +58,9 @@ int checkCell(char map[MAP_HEIGHT][MAP_WIDTH], int x, int y, int full_energy, in
    return 0;
 }
 
-
+//* safe *//
 int findMaximumPlace(int robot_x, int robot_y, int robot_energy, int robot_full_energy, 
-                     char result_map[MAP_HEIGHT][MAP_WIDTH], char temp_map[MAP_HEIGHT][MAP_WIDTH]) {
+                     char result_map[MAP_HEIGHT][MAP_WIDTH], char temp_map[MAP_HEIGHT][MAP_WIDTH]) {  
    
    if (!outOfBounds(robot_x, robot_y)) {
 
@@ -93,7 +94,8 @@ int findMaximumPlace(int robot_x, int robot_y, int robot_energy, int robot_full_
 
 // ** ------- Task 2 ------- ** //
 
-void initHeatMap(int heat_map[MAP_HEIGHT][MAP_WIDTH], int i) {
+//* safe *//
+void initHeatMap(int heat_map[MAP_HEIGHT][MAP_WIDTH], int i) { 
    if (i >= PA2_MAX_PATH) {
       return;
    } else {
@@ -102,7 +104,8 @@ void initHeatMap(int heat_map[MAP_HEIGHT][MAP_WIDTH], int i) {
    }
 }
 
-void shift(int queue[PA2_MAX_PATH][3], int size, int i) {
+//* safe *//
+void shift(int queue[PA2_MAX_PATH][3], int size, int i) {   
    if (i >= size-1) {
       return;
    } else {
@@ -113,7 +116,8 @@ void shift(int queue[PA2_MAX_PATH][3], int size, int i) {
    }
 }
 
-void pop(int queue[PA2_MAX_PATH][3], int &size) {
+//* safe *//
+void pop(int queue[PA2_MAX_PATH][3], int &size) {     
    if (size < 1) {
       return;
    } else {
@@ -122,7 +126,10 @@ void pop(int queue[PA2_MAX_PATH][3], int &size) {
    }
 }
 
-void floodFill(char map[MAP_HEIGHT][MAP_WIDTH], int heat_map[MAP_HEIGHT][MAP_WIDTH], int queue[PA2_MAX_PATH][3], int queue_size, int x, int y, int target_x, int target_y, int energy, int full_energy, int i) {
+//* safe *//
+void generateHeatMap(char map[MAP_HEIGHT][MAP_WIDTH], int heat_map[MAP_HEIGHT][MAP_WIDTH], 
+            int queue[PA2_MAX_PATH][3], int queue_size, int x, int y, int target_x, int target_y, int energy, int full_energy, 
+            int i, int chargers[PA2_MAX_PATH][2], int &charger_count) {
    // cout <<"entered floodFill for (" << x << ", " << y << "), i = " << i << endl;
 
    if (queue_size > 0) {
@@ -137,12 +144,31 @@ void floodFill(char map[MAP_HEIGHT][MAP_WIDTH], int heat_map[MAP_HEIGHT][MAP_WID
             // cout << "R: (" << x+1 << ", " << y << ")" << endl;
             // cout << "D: (" << x << ", " << y+1 << ")" << endl;
             // cout << "L: (" << x-1 << ", " << y << ")" << endl;
-            return;
+            // return;
          }
+
+         // if (isCharger(map, x, y)) {
+         //    energy = full_energy;
+         //    cout << "charged at (" << x << ", " << y << ")" << endl;
+         //    map[y][x] = VISITED;
+         //    heat_map[y][x] = i;
+         //    // cout << "branching off to: " << endl;
+         //    // cout << "U: (" << x << ", " << y-1 << ")" << endl;
+         //    // cout << "R: (" << x+1 << ", " << y << ")" << endl;
+         //    // cout << "D: (" << x << ", " << y+1 << ")" << endl;
+         //    // cout << "L: (" << x-1 << ", " << y << ")" << endl;
+         // }
 
          if (isCharger(map, x, y)) {
-            energy = full_energy;
-            cout << "charged at (" << x << ", " << y << ")" << endl;
+            map[y][x] = VISITED;
+            heat_map[y][x] = i;
+            chargers[charger_count][0] = x;
+            chargers[charger_count][1] = y;
+            charger_count++;
+            // cout << "New charger " << charger_count <<" added at (" << x << ", " << y << ")" << endl;
+         }
+         
+         if (isAvailable(map, x, y) || isRobot(map, x, y) || isCharger(map, x, y)) {
             map[y][x] = VISITED;
             heat_map[y][x] = i;
             // cout << "branching off to: " << endl;
@@ -152,17 +178,7 @@ void floodFill(char map[MAP_HEIGHT][MAP_WIDTH], int heat_map[MAP_HEIGHT][MAP_WID
             // cout << "L: (" << x-1 << ", " << y << ")" << endl;
          }
 
-         if (isAvailable(map, x, y) || isRobot(map, x, y)) {
-            map[y][x] = VISITED;
-            heat_map[y][x] = i;
-            // cout << "branching off to: " << endl;
-            // cout << "U: (" << x << ", " << y-1 << ")" << endl;
-            // cout << "R: (" << x+1 << ", " << y << ")" << endl;
-            // cout << "D: (" << x << ", " << y+1 << ")" << endl;
-            // cout << "L: (" << x-1 << ", " << y << ")" << endl;
-         }
-
-         if (energy >= 0 && !isBlocked(map, x, y)) {
+         if (energy >= -1 && !isBlocked(map, x, y)) {
             if (canVisit(map, x, y-1)) {
                queue[queue_size][0] = x;
                queue[queue_size][1] = y-1;
@@ -190,9 +206,10 @@ void floodFill(char map[MAP_HEIGHT][MAP_WIDTH], int heat_map[MAP_HEIGHT][MAP_WID
 
             if (queue[0][2] != i) {
                energy--;
+               // cout << "energy = " << energy << endl;
             }
 
-            floodFill(map, heat_map, queue, queue_size, queue[0][0], queue[0][1], target_x, target_y, energy, full_energy, queue[0][2]);
+            generateHeatMap(map, heat_map, queue, queue_size, queue[0][0], queue[0][1], target_x, target_y, energy, full_energy, queue[0][2], chargers, charger_count);
 
             // floodFill(map, heat_map, queue, queue_size, x, y-1, target_x, target_y, energy-1, full_energy, i);
             // floodFill(map, heat_map, queue, queue_size, x+1, y, target_x, target_y, energy-1, full_energy, i);
@@ -203,7 +220,8 @@ void floodFill(char map[MAP_HEIGHT][MAP_WIDTH], int heat_map[MAP_HEIGHT][MAP_WID
    }
 };
 
-void printHeatMap(int heat_map[MAP_HEIGHT][MAP_WIDTH]) {
+//* safe *//
+void printHeatMap(int heat_map[MAP_HEIGHT][MAP_WIDTH]) {  
    for (int i = 0; i < MAP_HEIGHT; i++) {
       for (int j = 0; j < MAP_WIDTH; j++) {
          cout.width(3);
@@ -213,25 +231,163 @@ void printHeatMap(int heat_map[MAP_HEIGHT][MAP_WIDTH]) {
    }
 }
 
+//* safe *//
+bool newCharger(int chargers[][2], int charger_count, int x, int y, int i) {    
+   if (i >= charger_count) {
+      return true;
+   } else {
+      if (chargers[i][0] == x && chargers[i][1] == y) {
+         return false;
+      } else {
+         return newCharger(chargers, charger_count, x, y, i+1);
+      }
+   }
+};
+
+//* safe *//
+void findReachableChargers(const char map[MAP_HEIGHT][MAP_WIDTH], int chargers[PA2_MAX_PATH][2],
+                   int x, int y, int energy, int &charger_count) {
+   
+   // if ((energy < 0) || outOfBounds(x,y)) {
+   //    return;
+   // } else {
+   //    if (isCharger(map, x, y)) {
+   //       if (newCharger(chargers, charger_count, x, y, 0)) {
+   //          chargers[charger_count][0] = x;
+   //          chargers[charger_count][1] = y;
+   //          charger_count++;
+   //       }
+   //    }
+   //    if (!isBlocked(map, x, y)) {
+   //       findReachableChargers(map, chargers, x, y-1, energy-1, charger_count);
+   //       findReachableChargers(map, chargers, x+1, y, energy-1, charger_count);
+   //       findReachableChargers(map, chargers, x, y+1, energy-1, charger_count);
+   //       findReachableChargers(map, chargers, x-1, y, energy-1, charger_count);
+   //    }
+   // }
+
+   if (!outOfBounds(x, y)) {
+		if (isCharger(map, x, y)) {
+         // cout << "found charger at (" << x << ", " << y << ")" << endl;
+         if (newCharger(chargers, charger_count, x, y, 0)) {
+            chargers[charger_count][0] = x;
+            chargers[charger_count][1] = y;
+            charger_count++;
+            // cout << "New charger " << charger_count <<" added at (" << x << ", " << y << ")" << endl;
+         }
+      }
+
+		if (energy > 0 && !isBlocked(map, x, y)) {
+         findReachableChargers(map, chargers, x, y-1, energy-1, charger_count);
+         findReachableChargers(map, chargers, x+1, y, energy-1, charger_count);
+         findReachableChargers(map, chargers, x, y+1, energy-1, charger_count);
+         findReachableChargers(map, chargers, x-1, y, energy-1, charger_count);
+		}
+	}
+};
+
+//* safe *//
+void checkClosest(int robot_x, int robot_y, int robot_energy, int robot_full_energy, const char map[MAP_HEIGHT][MAP_WIDTH], char temp_map[MAP_HEIGHT][MAP_WIDTH],
+                         int chargers[PA2_MAX_PATH][2], int charger_count, int i, int &closest_x, int &closest_y, int &closest_distance) {
+   if (i >= charger_count) {
+      cout << "exit checkClosest at i = " << i << ", closest = (" << closest_x << "," << closest_y << ")" << endl;
+      return;
+   } else {
+      // cout << "checkClosest: checking charger " << i << endl;
+      int distance = findShortestDistance(robot_x, robot_y, chargers[i][0], chargers[i][1], robot_energy, robot_full_energy, map, temp_map);
+      if (closest_distance > distance) {
+         closest_distance = distance;
+         closest_x = chargers[i][0];
+         closest_y = chargers[i][1];
+         // cout << "closest charger: (" << closest_x << ", " << closest_y << ") with distance " << closest_distance << endl;
+      }
+      checkClosest(robot_x, robot_y, robot_energy, robot_full_energy, map, temp_map, chargers, charger_count, i+1, closest_x, closest_y, closest_distance);
+   }
+};
+
+//* safe *//
+void sortChargers(int robot_x, int robot_y, int robot_energy, int robot_full_energy, const char map[MAP_HEIGHT][MAP_WIDTH], char temp_map[MAP_HEIGHT][MAP_WIDTH],
+                         int chargers[PA2_MAX_PATH][2], int sorted_chargers[PA2_MAX_PATH][2], int charger_count, int &sorted_charger_count, int i, int &closest_x, int &closest_y, int &closest_distance) {
+
+   if (i >= charger_count) {
+      return;
+   } else {
+      // int distance = findShortestDistance(robot_x, robot_y, chargers[i][0], chargers[i][1], robot_energy, robot_full_energy, map, temp_map);
+      char fool_map[MAP_HEIGHT][MAP_WIDTH];
+      copyMap(fool_map, map);
+      closest_distance = PA2_MAX_PATH;
+      checkClosest(robot_x, robot_y, robot_energy, robot_full_energy, map, temp_map, chargers, charger_count, 0, closest_x, closest_y, closest_distance);
+      if (newCharger(sorted_chargers, sorted_charger_count, closest_x, closest_y, 0)) {
+         sorted_chargers[sorted_charger_count][0] = closest_x;
+         sorted_chargers[sorted_charger_count][1] = closest_y;
+         sorted_charger_count++;
+         chargers[i][0] = MAP_WIDTH*2+1;
+         chargers[i][1] = MAP_HEIGHT*2+1;
+      }
+      fool_map[chargers[i][0]][chargers[i][1]] = AVAILABLE;
+      sortChargers(robot_x, robot_y, robot_energy, robot_full_energy, fool_map, temp_map, chargers, sorted_chargers, charger_count, sorted_charger_count, i+1, closest_x, closest_y, closest_distance);
+   }
+}
+
+//? not tested
+void iterateChargerPath(int robot_x, int robot_y, int target_x, int target_y, int robot_energy, 
+                         int robot_full_energy, const char map[MAP_HEIGHT][MAP_WIDTH], char temp_map[MAP_HEIGHT][MAP_WIDTH], int sorted_chargers[PA2_MAX_PATH][2], int i, int charger_count, int &shortestPath) {
+   // cout << "entering iterateChargerPath for i = " << i << endl;
+   if (i >= charger_count) {
+      cout << "exit iterateChargerPath" << endl;
+      return;
+   } else {
+      cout << "iterateChargerPath: iterating charger " << i << endl;
+      int current_distance = findShortestDistance(robot_x, robot_y, sorted_chargers[i][0], sorted_chargers[i][1], robot_full_energy, robot_full_energy, map, temp_map) + findShortestDistance(sorted_chargers[i][0], sorted_chargers[i][1], target_x, target_y, robot_full_energy, robot_full_energy, map, temp_map);
+      cout << "distance for charger " << i << "from (" << robot_x << "," << robot_y << " = " << current_distance << endl;
+      if (current_distance < shortestPath) {
+         shortestPath = current_distance;
+      }
+      char fool_map[MAP_HEIGHT][MAP_WIDTH];
+      copyMap(fool_map, map);
+      fool_map[sorted_chargers[i][0]][sorted_chargers[i][1]] = AVAILABLE;
+      iterateChargerPath(robot_x, robot_y, target_x, target_y, robot_energy, robot_full_energy, fool_map, temp_map, sorted_chargers, i+1, charger_count, shortestPath);
+   }
+}
+
+//TODO: non-immediate bug
 int findShortestDistance(int robot_x, int robot_y, int target_x, int target_y, int robot_energy, 
                          int robot_full_energy, const char map[MAP_HEIGHT][MAP_WIDTH], char temp_map[MAP_HEIGHT][MAP_WIDTH]) {
    int heat_map[MAP_HEIGHT][MAP_WIDTH];
    int queue[PA2_MAX_PATH][3];
    int queue_size = 1;
 
+   int chargers[PA2_MAX_PATH][2];
+   int sorted_chargers[PA2_MAX_PATH][2];
+   int charger_count = 0;
+   int sorted_charger_count = 0;
+   int closest_x = 0;
+   int closest_y = 0;
+   int shortestPath = PA2_MAX_PATH;
+
    initHeatMap(heat_map, 0);
    queue[0][0] = robot_x;
    queue[0][1] = robot_y;
    queue[0][2] = 1;
    copyMap(temp_map, map);
-   floodFill(temp_map, heat_map, queue, queue_size, robot_x, robot_y, target_x, target_y, robot_energy, robot_full_energy, 1);
-   printMap(temp_map);
-   printHeatMap(heat_map);
-   cout << "heat map index at target: " << heat_map[target_y][target_x] << endl;
-   if (heat_map[target_y][target_x] == 0) {
-      return PA2_MAX_PATH;
-   } else {
+   generateHeatMap(temp_map, heat_map, queue, queue_size, robot_x, robot_y, target_x, target_y, robot_energy, robot_full_energy, queue[0][2], chargers, charger_count);
+   // printMap(temp_map);
+   // printHeatMap(heat_map);
+   if (heat_map[target_y][target_x] != 0) {
+      cout << "Shortest distance between (" << robot_x << "," << robot_y << ") and (" << target_x << "," << target_y << ") is " << heat_map[target_y][target_x] << endl;
       return heat_map[target_y][target_x];
+   } else {
+      // findReachableChargers(map, chargers, robot_x, robot_y, robot_energy, charger_count);
+      if (charger_count <= 0) {
+         return PA2_MAX_PATH;
+      } else {
+         closest_x = chargers[0][0];
+         closest_y = chargers[0][1];
+         sortChargers(robot_x, robot_y, robot_full_energy, robot_full_energy, map, temp_map, chargers, sorted_chargers, charger_count, sorted_charger_count, 0, closest_x, closest_y, heat_map[closest_y][closest_x]);
+         cout << "exited sortChargers" << endl;
+         iterateChargerPath(robot_x, robot_y, target_x, target_y, robot_energy, robot_full_energy, map, temp_map, sorted_chargers, 0, sorted_charger_count, shortestPath);
+         return shortestPath;
+      }
    }
 }
 
@@ -290,7 +446,7 @@ int findPathSequence(int robot_x, int robot_y, int target_x, int target_y, int r
    queue[0][1] = robot_y;
    queue[0][2] = 1;
    copyMap(temp_map, map);
-   floodFill(temp_map, heat_map, queue, queue_size, robot_x, robot_y, target_x, target_y, robot_energy, robot_full_energy, 1);
+   // generateHeatMap(temp_map, heat_map, queue, queue_size, robot_x, robot_y, target_x, target_y, robot_energy, robot_full_energy, 1);
    printMap(temp_map);
    printHeatMap(heat_map);
    if (heat_map[target_y][target_x] == 0) {
@@ -299,49 +455,16 @@ int findPathSequence(int robot_x, int robot_y, int target_x, int target_y, int r
       pathCount = heat_map[target_y][target_x];
       result_sequence[pathCount] = '\0';
       result_sequence[pathCount-1] = 'T';
-      linkPath(heat_map,   result_sequence, target_x, target_y, pathCount-2);
+      linkPath(heat_map, result_sequence, target_x, target_y, pathCount-2);
       return heat_map[target_y][target_x];
    }
 };
 
 // ** ------- Task 4 ------- ** //
 
-bool newCharger(int chargers[][2], int charger_count, int x, int y, int i) {
-   if (i >= charger_count) {
-      return true;
-   } else {
-      if (chargers[i][0] == x && chargers[i][1] == y) {
-         return false;
-      } else {
-         return newCharger(chargers, charger_count, x, y, i+1);
-      }
-   }
-};
-
-void findReachableChargers(const char map[MAP_HEIGHT][MAP_WIDTH], int chargers[PA2_MAX_PATH][2],
-                   int x, int y, int energy, int &charger_count) {
-   
-   if ((energy < 0) || outOfBounds(x,y)) {
-      return;
-   } else {
-      if (isCharger(map, x, y)) {
-         if (newCharger(chargers, charger_count, x, y, 0)) {
-            chargers[charger_count][0] = x;
-            chargers[charger_count][1] = y;
-            charger_count++;
-         }
-      }
-      if (!isBlocked(map, x, y)) {
-         findReachableChargers(map, chargers, x, y-1, energy-1, charger_count);
-         findReachableChargers(map, chargers, x+1, y, energy-1, charger_count);
-         findReachableChargers(map, chargers, x, y+1, energy-1, charger_count);
-         findReachableChargers(map, chargers, x-1, y, energy-1, charger_count);
-      }
-   }
-};
 
 void checkFarthest(int robot_x, int robot_y, int robot_energy, int robot_full_energy, const char map[MAP_HEIGHT][MAP_WIDTH], char temp_map[MAP_HEIGHT][MAP_WIDTH],
-                         int chargers[PA2_MAX_PATH][2], int charger_count, int i, int &farthest_x, int &farthest_y, int &farthest_distance) {
+                         int chargers[PA2_MAX_PATH][2], int charger_count, int i, int &farthest_x, int &farthest_y, int &farthest_distance) {   //* safe *//
    if (i >= charger_count) {
       return;
    } else {
@@ -355,9 +478,10 @@ void checkFarthest(int robot_x, int robot_y, int robot_energy, int robot_full_en
    }
 };
 
+
 int findFarthestPossibleCharger(int robot_x, int robot_y, int robot_original_x, int robot_original_y, 
                                 int &target_x, int &target_y, int robot_energy, int robot_full_energy,
-                                const char map[MAP_HEIGHT][MAP_WIDTH], char temp_map[MAP_HEIGHT][MAP_WIDTH]) {
+                                const char map[MAP_HEIGHT][MAP_WIDTH], char temp_map[MAP_HEIGHT][MAP_WIDTH]) {    //* safe *//
    
    int chargers[MAP_HEIGHT*MAP_WIDTH][2];
    int charger_count = 0;
