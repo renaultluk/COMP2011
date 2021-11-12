@@ -18,6 +18,14 @@ using namespace std;
     A person's priority = job priority + age priority
     For exmaple, a medical staff with age >=60 has priority 3 + 4 = 7
 */
+
+void swap(Person* p1, Person* p2)
+{
+    Person* temp = p1;
+    p1 = p2;
+    p2 = temp;
+}
+
 void setPriority(Person& p){
 	int jobPriority, agePriority;
     
@@ -59,13 +67,18 @@ void prioritySort( Person queue[], Person* pointerqueue[], int size) {
     for (int i = 0; i < size; i++) {
          setPriority(queue[i]);
     }
+    
     // Task 1b
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size-i-1; j++) {
-            if (queue[j].priority < queue[j+1].priority) {
+    for (int i = 0; i < size+1; i++) {
+        for (int j = 0; j < size-i; j++) {
+            Person a = *(pointerqueue[j]);
+            Person b = *(pointerqueue[j+1]);
+            if (a.priority < b.priority) {
                 Person* temp = pointerqueue[j];
                 pointerqueue[j] = pointerqueue[j+1];
                 pointerqueue[j+1] = temp;
+                // pointerqueue[j] = &queue[j+1];
+                // pointerqueue[j+1] = &queue[j];
             }
         }
     }
@@ -78,6 +91,7 @@ void prioritySort( Person queue[], Person* pointerqueue[], int size) {
     DO NOT remove him from the sign up queue
 */
 void vaccinateTopPriority(Person queue[], Person* pointerqueue[], int size) {
+    (*pointerqueue[0]).vaccined = true;
     pointerqueue[0] = nullptr;
 
     for (int i = 1; i < size; i++) {
@@ -94,11 +108,18 @@ void vaccinateTopPriority(Person queue[], Person* pointerqueue[], int size) {
     This function is used when setup the initial queues from file
 */
 void addPerson(int id, const char name[], char job, int age, Person queue[], Person* pointerqueue[], int& size) {
+//    cout << "entered addPerson" << endl;
    queue[size].id = id;
+//    cout << "added id" << endl;
    queue[size].age = age;
+//    cout << "added age" << endl;
    queue[size].job = job;
+//    cout  << "added job" << endl;
+   queue[size].vaccined = false;
    strcpy(queue[size].name, name);
+//    cout << "added name" << endl;
    pointerqueue[size] = &queue[size];
+//    cout << "added pointerqueue" << endl;
 
    setPriority(queue[size]);
    prioritySort(queue, pointerqueue, size);

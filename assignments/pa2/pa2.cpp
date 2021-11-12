@@ -142,7 +142,7 @@ void floodFill(char map[MAP_HEIGHT][MAP_WIDTH], int heat_map[MAP_HEIGHT][MAP_WID
 
          if (isCharger(map, x, y)) {
             energy = full_energy;
-            cout << "charged at (" << x << ", " << y << ")" << endl;
+            // cout << "charged at (" << x << ", " << y << ")" << endl;
             map[y][x] = VISITED;
             heat_map[y][x] = i;
             // cout << "branching off to: " << endl;
@@ -203,16 +203,6 @@ void floodFill(char map[MAP_HEIGHT][MAP_WIDTH], int heat_map[MAP_HEIGHT][MAP_WID
    }
 };
 
-void printHeatMap(int heat_map[MAP_HEIGHT][MAP_WIDTH]) {
-   for (int i = 0; i < MAP_HEIGHT; i++) {
-      for (int j = 0; j < MAP_WIDTH; j++) {
-         cout.width(3);
-         cout << heat_map[i][j];
-      }
-      cout << endl;
-   }
-}
-
 int findShortestDistance(int robot_x, int robot_y, int target_x, int target_y, int robot_energy, 
                          int robot_full_energy, const char map[MAP_HEIGHT][MAP_WIDTH], char temp_map[MAP_HEIGHT][MAP_WIDTH]) {
    int heat_map[MAP_HEIGHT][MAP_WIDTH];
@@ -225,9 +215,8 @@ int findShortestDistance(int robot_x, int robot_y, int target_x, int target_y, i
    queue[0][2] = 1;
    copyMap(temp_map, map);
    floodFill(temp_map, heat_map, queue, queue_size, robot_x, robot_y, target_x, target_y, robot_energy, robot_full_energy, 1);
-   printMap(temp_map);
-   printHeatMap(heat_map);
-   cout << "heat map index at target: " << heat_map[target_y][target_x] << endl;
+   // printMap(temp_map);
+   // cout << "heat map index at target: " << heat_map[target_y][target_x] << endl;
    if (heat_map[target_y][target_x] == 0) {
       return PA2_MAX_PATH;
    } else {
@@ -291,8 +280,7 @@ int findPathSequence(int robot_x, int robot_y, int target_x, int target_y, int r
    queue[0][2] = 1;
    copyMap(temp_map, map);
    floodFill(temp_map, heat_map, queue, queue_size, robot_x, robot_y, target_x, target_y, robot_energy, robot_full_energy, 1);
-   printMap(temp_map);
-   printHeatMap(heat_map);
+   // printMap(temp_map);
    if (heat_map[target_y][target_x] == 0) {
       return PA2_MAX_PATH;
    } else {
